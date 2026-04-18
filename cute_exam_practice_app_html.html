@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cute Exam Buddy</title>
+  <style>
+    :root {
+      --bg1: #fff7fb;
+      --bg2: #f8f2ff;
+      --card: rgba(255, 255, 255, 0.88);
+      --border: #f0d7ea;
+      --text: #4b4453;
+      --muted: #7a7185;
+      --pink: #ff7fb8;
+      --pink-dark: #f05d9c;
+      --purple: #9a7cff;
+      --purple-dark: #7b5cf2;
+      --green: #39b980;
+      --green-bg: #eafaf2;
+      --red: #e0567a;
+      --red-bg: #fff0f4;
+      --shadow: 0 16px 40px rgba(188, 140, 183, 0.18);
+      --radius: 24px;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background: linear-gradient(135deg, #fff3f8 0%, #f9f4ff 48%, #f3ebff 100%);
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    .grid { display: grid; gap: 20px; }
+    .hero { grid-template-columns: 1.5fr 1fr; }
+    .two-col { grid-template-columns: 320px 1fr; }
+    .result-grid { grid-template-columns: 1fr 280px; }
+
+    .card {
+      background: var(--card);
+      border: 1px solid rgba(255,255,255,0.65);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+    }
+
+    .card-body { padding: 22px; }
+    .title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 2rem;
+      margin: 0;
+      color: var(--pink-dark);
+    }
+    .subtitle { color: var(--muted); line-height: 1.6; }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #ffe8f3;
+      color: var(--pink-dark);
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-size: 0.92rem;
+      font-weight: 700;
+    }
+
+    .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .stat-box {
+      background: #faf6ff;
+      border-radius: 20px;
+      padding: 18px;
+      text-align: center;
+    }
+    .stat-value { font-size: 1.8rem; font-weight: 800; }
+    .purple { color: var(--purple-dark); }
+    .pink { color: var(--pink-dark); }
+
+    .gentle {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      background: #fff1f7;
+      border-radius: 18px;
+      padding: 14px;
+      margin-bottom: 14px;
+      color: var(--text);
+    }
+
+    .tabs {
+      display: flex;
+      background: rgba(255,255,255,0.85);
+      border-radius: 20px;
+      padding: 6px;
+      box-shadow: var(--shadow);
+      gap: 6px;
+      margin: 22px 0;
+      flex-wrap: wrap;
+    }
+
+    .tab-btn {
+      border: 0;
+      background: transparent;
+      padding: 12px 16px;
+      border-radius: 16px;
+      font-weight: 700;
+      color: var(--muted);
+      cursor: pointer;
+    }
+    .tab-btn.active {
+      background: linear-gradient(135deg, #fff0f6, #f3ebff);
+      color: var(--text);
+    }
+
+    .section { display: none; }
+    .section.active { display: block; }
+
+    .bank-list, .question-list, .review-list {
+      max-height: 460px;
+      overflow: auto;
+      padding-right: 6px;
+    }
+
+    .bank-item {
+      width: 100%;
+      text-align: left;
+      border: 1px solid #eadfeb;
+      background: white;
+      padding: 16px;
+      border-radius: 18px;
+      cursor: pointer;
+      margin-bottom: 12px;
+    }
+    .bank-item.active {
+      background: #fff0f7;
+      border-color: #f7b6d2;
+    }
+
+    .bank-top, .row-between {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .muted { color: var(--muted); font-size: 0.95rem; }
+
+    .badge {
+      background: #f3ebff;
+      color: var(--purple-dark);
+      border-radius: 999px;
+      padding: 6px 12px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .banner {
+      background: linear-gradient(135deg, #fff1f7, #f4eeff);
+      border-radius: 22px;
+      padding: 20px;
+      margin-bottom: 18px;
+    }
+
+    .question-card {
+      border: 1px solid #eee2ef;
+      border-radius: 18px;
+      background: white;
+      padding: 16px;
+      margin-bottom: 14px;
+    }
+
+    .choice-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .choice-box {
+      background: #faf9fc;
+      border-radius: 14px;
+      padding: 12px;
+      font-size: 0.95rem;
+    }
+
+    .btn-row { display: flex; flex-wrap: wrap; gap: 10px; }
+    button, .btn {
+      font: inherit;
+    }
+    .btn {
+      border: 0;
+      border-radius: 18px;
+      padding: 12px 16px;
+      cursor: pointer;
+      font-weight: 700;
+      transition: 0.18s ease;
+    }
+    .btn:hover { transform: translateY(-1px); }
+    .btn-primary { background: var(--pink-dark); color: white; }
+    .btn-primary:hover { background: #de4c8d; }
+    .btn-purple { background: var(--purple-dark); color: white; }
+    .btn-purple:hover { background: #6847ef; }
+    .btn-outline {
+      background: white;
+      color: var(--text);
+      border: 1px solid #e7dbe9;
+    }
+    .btn-outline:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    textarea {
+      width: 100%;
+      min-height: 360px;
+      border: 1px solid #e6dcea;
+      border-radius: 20px;
+      padding: 16px;
+      resize: vertical;
+      font: inherit;
+      color: var(--text);
+      background: white;
+    }
+
+    pre {
+      white-space: pre-wrap;
+      word-break: break-word;
+      margin: 0;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+
+    .hint, .empty {
+      border-radius: 18px;
+      padding: 16px;
+      background: #faf7ff;
+      border: 1px dashed #dccdf4;
+      color: var(--muted);
+    }
+
+    .error {
+      background: #fff1f3;
+      color: #c23b5c;
+      padding: 14px;
+      border-radius: 18px;
+    }
+
+    .progress-wrap {
+      width: 100%;
+      height: 12px;
+      border-radius: 999px;
+      background: #f1e8f7;
+      overflow: hidden;
+    }
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--pink) 0%, var(--purple) 100%);
+      width: 0%;
+      transition: width 0.2s ease;
+    }
+
+    .exam-box {
+      background: linear-gradient(135deg, #ffffff, #fff4f8);
+      border-radius: 24px;
+      padding: 22px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.8);
+    }
+
+    .answer-btn {
+      width: 100%;
+      text-align: left;
+      background: white;
+      border: 1px solid #eadfeb;
+      border-radius: 18px;
+      padding: 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 10px;
+      cursor: pointer;
+    }
+    .answer-btn:hover { background: #fff4f8; }
+    .answer-key {
+      width: 34px;
+      height: 34px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: #ffe8f2;
+      color: var(--pink-dark);
+      font-weight: 800;
+      flex-shrink: 0;
+    }
+
+    .result-hero {
+      background: linear-gradient(135deg, #edfdf5, #fff1f7);
+      border-radius: 24px;
+      padding: 28px;
+      text-align: center;
+    }
+    .result-score { font-size: 2rem; font-weight: 800; margin: 8px 0; }
+
+    .review-item {
+      border: 1px solid #eadfeb;
+      border-radius: 18px;
+      padding: 16px;
+      background: white;
+      margin-bottom: 12px;
+    }
+
+    .ok { color: var(--green); }
+    .bad { color: var(--red); }
+    .good-box {
+      background: var(--green-bg);
+      color: var(--green);
+      border-radius: 16px;
+      padding: 12px;
+      font-size: 0.95rem;
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(72, 44, 88, 0.35);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .modal-backdrop.show { display: flex; }
+    .modal {
+      max-width: 460px;
+      width: 100%;
+      background: white;
+      border-radius: 24px;
+      padding: 22px;
+      box-shadow: var(--shadow);
+    }
+
+    @media (max-width: 900px) {
+      .hero, .two-col, .result-grid { grid-template-columns: 1fr; }
+      .choice-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="grid hero">
+      <div class="card">
+        <div class="card-body">
+          <div class="row-between">
+            <div>
+              <h1 class="title">💖 Cute Exam Buddy</h1>
+              <p class="subtitle">A soft and cheerful practice space for reviewing mock exams, tracking scores, and retrying missed questions.</p>
+            </div>
+            <div class="pill">✨ Study mode</div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-body">
+          <div class="gentle">🌷 <span>A little reminder: progress matters more than perfection.</span></div>
+          <div class="stats">
+            <div class="stat-box">
+              <div class="stat-value purple" id="statBanks">0</div>
+              <div class="muted">Exam banks</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-value pink" id="statQuestions">0</div>
+              <div class="muted">Questions selected</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-value purple" id="statStreak">0</div>
+              <div class="muted">Day streak</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-value pink" id="statBest">0</div>
+              <div class="muted">Best score</div>
+            </div>
+          </div>
+              <div class="muted">Exam banks</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-value pink" id="statQuestions">0</div>
+              <div class="muted">Questions selected</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="bank">Question Bank</button>
+      <button class="tab-btn" data-tab="import">Import Exam</button>
+      <button class="tab-btn" data-tab="practice">Practice Mode</button>
+      <button class="tab-btn" data-tab="backup">Backup</button>
+    </div>
+
+    <section class="section active" id="section-bank">
+      <div class="grid two-col">
+        <div class="card">
+          <div class="card-body">
+            <h2 style="margin-top:0; color: var(--purple-dark);">📁 Saved banks</h2>
+            <p class="subtitle">Each imported exam becomes its own folder-like study tab.</p>
+            <div class="bank-list" id="bankList"></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-body" id="bankPreview"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="section-import">
+      <div class="card">
+        <div class="card-body">
+          <h2 style="margin-top:0; color: var(--pink-dark);">➕ Import formatted exam text</h2>
+          <p class="subtitle">Paste the strict format output here. It will autosave into local storage as a new exam bank.</p>
+
+          <div class="hint" style="margin-bottom: 16px;">
+            <div style="font-weight: 700; margin-bottom: 8px;">Required format</div>
+            <pre>TITLE: Sample Exam
+
+Q1: Question here?
+A: Choice A
+B: Choice B
+C: Choice C
+D: Choice D
+ANS: B</pre>
+          </div>
+
+          <textarea id="importText" placeholder="Paste the generated exam text here..."></textarea>
+          <div id="importError" style="margin-top: 12px;"></div>
+          <div class="btn-row" style="margin-top: 14px;">
+            <button class="btn btn-purple" id="saveBankBtn">Save to question bank</button>
+            <button class="btn btn-outline" id="clearImportBtn">Clear</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="section-practice">
+      <div class="card">
+        <div class="card-body" id="practiceContent"></div>
+      </div>
+    </section>
+
+    <section class="section" id="section-backup">
+      <div class="card">
+        <div class="card-body">
+          <h2 style="margin-top:0; color: var(--purple-dark);">🗂 Backup & restore</h2>
+          <p class="subtitle">Export all saved exam banks as JSON, or import a backup file later.</p>
+          <div class="btn-row" style="margin-top: 14px;">
+            <button class="btn btn-purple" id="exportJsonBtn">Export JSON backup</button>
+            <label class="btn btn-outline" for="importJsonFile" style="display:inline-flex; align-items:center;">Import JSON backup</label>
+            <input id="importJsonFile" type="file" accept="application/json" style="display:none;" />
+          </div>
+          <div id="backupMessage" style="margin-top: 14px;"></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="modal-backdrop" id="deleteModal">
+    <div class="modal">
+      <h3 style="margin-top:0;">Delete this exam bank?</h3>
+      <p class="subtitle" id="deleteModalText"></p>
+      <div class="btn-row" style="justify-content: flex-end; margin-top: 18px;">
+        <button class="btn btn-outline" id="cancelDeleteBtn">Cancel</button>
+        <button class="btn btn-primary" id="confirmDeleteBtn">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'cute_exam_banks_html_v2';
+    const META_KEY = 'cute_exam_meta_html_v1';
+
+    let banks = [];
+    let selectedBankId = null;
+    let session = null;
+    let bankToDelete = null;
+    let sessionTimer = null;
+    let meta = {
+      streak: 0,
+      lastStudyDate: null,
+      bestScore: 0
+    };
+
+    const bankList = document.getElementById('bankList');
+    const bankPreview = document.getElementById('bankPreview');
+    const practiceContent = document.getElementById('practiceContent');
+    const importText = document.getElementById('importText');
+    const importError = document.getElementById('importError');
+    const statBanks = document.getElementById('statBanks');
+    const statQuestions = document.getElementById('statQuestions');
+    const statStreak = document.getElementById('statStreak');
+    const statBest = document.getElementById('statBest');
+    const deleteModal = document.getElementById('deleteModal');
+    const deleteModalText = document.getElementById('deleteModalText');
+
+    function shuffleArray(arr) {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    function slugify(text) {
+      return (text || 'untitled')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)/g, '');
+    }
+
+    function escapeHtml(text) {
+      return String(text)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function saveBanks() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(banks));
+      localStorage.setItem(META_KEY, JSON.stringify(meta));
+    }
+
+    function loadBanks() {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        try {
+          banks = JSON.parse(saved);
+          selectedBankId = banks[0]?.id || null;
+        } catch {
+          banks = [];
+        }
+      }
+      const savedMeta = localStorage.getItem(META_KEY);
+      if (savedMeta) {
+        try {
+          meta = { ...meta, ...JSON.parse(savedMeta) };
+        } catch {}
+      }
+    }
+
+    function getSelectedBank() {
+      return banks.find(bank => bank.id === selectedBankId) || null;
+    }
+
+    function parseExamText(raw) {
+      const text = raw.replace(/\r/g, '').trim();
+      if (!text) throw new Error('Please paste the formatted exam text first.');
+
+      const titleMatch = text.match(/^TITLE:\s*(.+)$/m);
+      if (!titleMatch) throw new Error('Missing title. The first line should look like: TITLE: Your Exam Name');
+
+      const title = titleMatch[1].trim();
+      const questionBlocks = text.match(/Q\d+:.*?(?=\n\nQ\d+:|$)/gs);
+      if (!questionBlocks || questionBlocks.length === 0) {
+        throw new Error('No questions found. Make sure each one starts with Q1:, Q2:, and so on.');
+      }
+
+      const questions = questionBlocks.map((block, index) => {
+        const qMatch = block.match(/^Q(\d+):\s*(.+)$/m);
+        const aMatch = block.match(/^A:\s*(.*)$/m);
+        const bMatch = block.match(/^B:\s*(.*)$/m);
+        const cMatch = block.match(/^C:\s*(.*)$/m);
+        const dMatch = block.match(/^D:\s*(.*)$/m);
+        const ansMatch = block.match(/^ANS:\s*([ABCD])$/m);
+
+        if (!qMatch || !aMatch || !bMatch || !cMatch || !dMatch || !ansMatch) {
+          throw new Error(`Question ${index + 1} is incomplete or not in the required format.`);
+        }
+
+        return {
+          id: `q-${index + 1}`,
+          number: Number(qMatch[1]),
+          prompt: qMatch[2].trim(),
+          choices: [
+            { key: 'A', text: aMatch[1].trim() },
+            { key: 'B', text: bMatch[1].trim() },
+            { key: 'C', text: cMatch[1].trim() },
+            { key: 'D', text: dMatch[1].trim() }
+          ],
+          answer: ansMatch[1].trim()
+        };
+      });
+
+      return {
+        id: `${slugify(title)}-${Date.now()}`,
+        title,
+        createdAt: new Date().toISOString(),
+        questions
+      };
+    }
+
+    function makeExamSession(bank, subset = null, timeLimitMinutes = null) {
+      const sourceQuestions = subset || bank.questions;
+      const shuffledQuestions = shuffleArray(sourceQuestions).map(q => ({
+        ...q,
+        shuffledChoices: shuffleArray(q.choices)
+      }));
+
+      return {
+        bankId: bank.id,
+        bankTitle: bank.title,
+        questions: shuffledQuestions,
+        currentIndex: 0,
+        answers: {},
+        completed: false,
+        score: 0,
+        wrongQuestionIds: [],
+        mode: subset ? 'retry-wrong' : 'full-exam',
+        timeLimitMinutes,
+        remainingSeconds: timeLimitMinutes ? timeLimitMinutes * 60 : null,
+        startedAt: Date.now()
+      };
+    }
+
+    function setTab(tab) {
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.tab === tab);
+      });
+      document.querySelectorAll('.section').forEach(section => {
+        section.classList.toggle('active', section.id === `section-${tab}`);
+      });
+      render();
+    }
+
+    function renderStats() {
+      statBanks.textContent = banks.length;
+      statQuestions.textContent = getSelectedBank()?.questions.length || 0;
+      statStreak.textContent = meta.streak || 0;
+      statBest.textContent = meta.bestScore || 0;
+    }
+
+    function renderBankList() {
+      if (banks.length === 0) {
+        bankList.innerHTML = '<div class="empty">No exam banks yet. Import one in the next tab.</div>';
+        return;
+      }
+
+      bankList.innerHTML = banks.map(bank => `
+        <button class="bank-item ${selectedBankId === bank.id ? 'active' : ''}" data-bank-id="${bank.id}">
+          <div class="bank-top">
+            <div>
+              <div style="font-weight: 700;">${escapeHtml(bank.title)}</div>
+              <div class="muted">${bank.questions.length} questions</div>
+            </div>
+            <div class="badge">#${bank.questions.length}</div>
+          </div>
+        </button>
+      `).join('');
+
+      bankList.querySelectorAll('[data-bank-id]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          selectedBankId = btn.dataset.bankId;
+          render();
+        });
+      });
+    }
+
+    function renderBankPreview() {
+      const selectedBank = getSelectedBank();
+      if (!selectedBank) {
+        bankPreview.innerHTML = '<div class="empty">Pick a bank from the left to see its questions here.</div>';
+        return;
+      }
+
+      bankPreview.innerHTML = `
+        <div class="banner">
+          <div class="row-between">
+            <div>
+              <h2 style="margin:0 0 6px 0;">${escapeHtml(selectedBank.title)}</h2>
+              <div class="muted">Ready for a gentle but focused review session.</div>
+            </div>
+            <div class="btn-row">
+              <button class="btn btn-primary" id="startExamBtn">▶ Start exam</button>
+              <button class="btn btn-outline" id="deleteBankBtn">🗑 Delete</button>
+            </div>
+          </div>
+        </div>
+        <div class="question-list">
+          ${selectedBank.questions.map(q => `
+            <div class="question-card">
+              <div style="font-weight:700; margin-bottom: 10px;">${q.number}. ${escapeHtml(q.prompt)}</div>
+              <div class="choice-grid">
+                ${q.choices.map(choice => `
+                  <div class="choice-box"><strong>${choice.key}:</strong> ${escapeHtml(choice.text || '—')}</div>
+                `).join('')}
+              </div>
+              <div style="margin-top: 12px; color: var(--green); font-size: 0.95rem;">Correct answer: ${q.answer}</div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+
+      document.getElementById('startExamBtn').addEventListener('click', () => {
+        const timeInput = prompt('Optional timer in minutes. Leave blank for no timer:', '30');
+        const parsedMinutes = timeInput && !Number.isNaN(Number(timeInput)) && Number(timeInput) > 0 ? Number(timeInput) : null;
+        session = makeExamSession(selectedBank, null, parsedMinutes);
+        startTimerIfNeeded();
+        setTab('practice');
+      });
+      document.getElementById('deleteBankBtn').addEventListener('click', () => {
+        bankToDelete = selectedBank;
+        deleteModalText.textContent = `This will remove "${selectedBank.title}" from local storage.`;
+        deleteModal.classList.add('show');
+      });
+    }
+
+    function renderPractice() {
+      if (!session) {
+        practiceContent.innerHTML = `
+          <h2 style="margin-top:0; color: var(--purple-dark);">🔀 Practice mode</h2>
+          <p class="subtitle">Questions and answer choices are shuffled each time for better review.</p>
+          <div class="banner" style="text-align:center; padding: 34px;">
+            <div style="font-size: 2rem; margin-bottom: 10px;">💫</div>
+            <h3 style="margin:0;">No active practice session</h3>
+            <p class="subtitle">Open a bank in the Question Bank tab and press Start exam.</p>
+          </div>
+        `;
+        return;
+      }
+
+      if (!session.completed) {
+        const current = session.questions[session.currentIndex];
+        const progress = (session.currentIndex / session.questions.length) * 100;
+        practiceContent.innerHTML = `
+          <h2 style="margin-top:0; color: var(--purple-dark);">🔀 Practice mode</h2>
+          <p class="subtitle">Questions and answer choices are shuffled each time for better review.</p>
+          <div class="row-between" style="margin-bottom: 16px;">
+            <div>
+              <div class="muted">${escapeHtml(session.bankTitle)}</div>
+              <div style="font-size: 1.15rem; font-weight: 800;">Question ${session.currentIndex + 1} of ${session.questions.length}</div>
+            </div>
+            ${session.remainingSeconds != null ? `<div class="badge" style="background:#fff0f4; color: var(--red);">⏱ ${formatTime(session.remainingSeconds)}</div>` : ''}
+              <div class="badge">${session.mode === 'retry-wrong' ? 'Retry wrong answers' : 'Full exam'}</div>
+          </div>
+          <div class="progress-wrap"><div class="progress-bar" style="width:${progress}%;"></div></div>
+          <div class="exam-box" style="margin-top: 18px;">
+            <div style="font-size: 1.2rem; font-weight: 800; line-height: 1.7;">${escapeHtml(current.prompt)}</div>
+            <div style="margin-top: 16px;">
+              ${current.shuffledChoices.map(choice => `
+                <button class="answer-btn" data-choice="${choice.key}">
+                  <span class="answer-key">${choice.key}</span>
+                  <span>${escapeHtml(choice.text || '—')}</span>
+                </button>
+              `).join('')}
+            </div>
+          </div>
+        `;
+
+        practiceContent.querySelectorAll('[data-choice]').forEach(btn => {
+          btn.addEventListener('click', () => submitAnswer(btn.dataset.choice));
+        });
+        return;
+      }
+
+      const wrongCount = session.questions.length - session.score;
+      practiceContent.innerHTML = `
+        <div class="result-hero">
+          <div style="font-size: 2.2rem;">${wrongCount === 0 ? '🎉' : '✨'}</div>
+          <h2 style="margin: 10px 0 0 0;">Practice complete</h2>
+          <div class="result-score">${session.score} / ${session.questions.length}</div>
+          <div class="btn-row" style="justify-content:center;">
+            <div class="badge" style="background:#eafaf2; color: var(--green);">Correct: ${session.score}</div>
+            <div class="badge" style="background:#fff0f4; color: var(--red);">Wrong: ${wrongCount}</div>
+          </div>
+        </div>
+        <div class="grid result-grid" style="margin-top: 18px;">
+          <div class="card" style="box-shadow:none; border:1px solid #eadfeb; background:white;">
+            <div class="card-body">
+              <h3 style="margin-top:0;">Answer review</h3>
+              <p class="subtitle">Check which items were right or wrong.</p>
+              <div class="review-list">
+                ${session.questions.map((q, index) => {
+                  const result = session.answers[q.id];
+                  const selectedChoice = q.choices.find(c => c.key === result.selected);
+                  const correctChoice = q.choices.find(c => c.key === q.answer);
+                  return `
+                    <div class="review-item">
+                      <div class="row-between">
+                        <div style="font-weight:700;">${index + 1}. ${escapeHtml(q.prompt)}</div>
+                        <div class="${result.isCorrect ? 'ok' : 'bad'}">${result.isCorrect ? '✔' : '✘'}</div>
+                      </div>
+                      <div class="muted" style="margin-top:8px;">Your answer: ${result.selected}${selectedChoice?.text ? ` — ${escapeHtml(selectedChoice.text)}` : ''}</div>
+                      ${result.isCorrect ? '' : `<div class="ok" style="margin-top:6px; font-size:0.95rem;">Correct answer: ${q.answer} — ${escapeHtml(correctChoice?.text || '')}</div>`}
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+            </div>
+          </div>
+          <div class="card" style="box-shadow:none; border:1px solid #eadfeb; background:white;">
+            <div class="card-body">
+              <h3 style="margin-top:0; color: var(--purple-dark);">Next step</h3>
+              <p class="subtitle">Choose how to continue the review.</p>
+              <div class="btn-row" style="flex-direction: column;">
+                <button class="btn btn-purple" id="backToBankBtn">↩ Back to bank</button>
+                <button class="btn btn-outline" id="restartExamBtn">🔀 Restart full exam</button>
+                <button class="btn btn-outline" id="retryWrongBtn" ${session.wrongQuestionIds.length === 0 ? 'disabled' : ''}>❌ Retry wrong answers</button>
+              </div>
+              ${session.wrongQuestionIds.length === 0 ? '<div class="good-box" style="margin-top:12px;">Perfect score — no wrong answers to retry 💖</div>' : ''}
+            </div>
+          </div>
+        </div>
+      `;
+
+      document.getElementById('backToBankBtn').addEventListener('click', () => {
+        session = null;
+        setTab('bank');
+      });
+      document.getElementById('restartExamBtn').addEventListener('click', () => {
+        const bank = getSelectedBank();
+        if (bank) {
+          session = makeExamSession(bank, null, session.timeLimitMinutes);
+          startTimerIfNeeded();
+          render();
+        }
+      });
+      const retryBtn = document.getElementById('retryWrongBtn');
+      if (retryBtn) {
+        retryBtn.addEventListener('click', () => {
+          const bank = getSelectedBank();
+          if (!bank || session.wrongQuestionIds.length === 0) return;
+          const wrongSet = new Set(session.wrongQuestionIds);
+          const wrongQuestions = bank.questions.filter(q => wrongSet.has(q.id));
+          session = makeExamSession(bank, wrongQuestions, session.timeLimitMinutes);
+          startTimerIfNeeded();
+          render();
+        });
+      }
+    }
+
+    function submitAnswer(choiceKey) {
+      const current = session.questions[session.currentIndex];
+      const isCorrect = choiceKey === current.answer;
+      session.answers[current.id] = {
+        selected: choiceKey,
+        correct: current.answer,
+        isCorrect
+      };
+
+      const isLast = session.currentIndex === session.questions.length - 1;
+      if (isLast) {
+        finishSession();
+      } else {
+        session.currentIndex += 1;
+      }
+      render();
+    }
+
+    function finishSession() {
+      const values = Object.values(session.answers);
+      session.score = values.filter(v => v.isCorrect).length;
+      session.wrongQuestionIds = Object.entries(session.answers)
+        .filter(([, v]) => !v.isCorrect)
+        .map(([questionId]) => questionId);
+      session.completed = true;
+      if (sessionTimer) {
+        clearInterval(sessionTimer);
+        sessionTimer = null;
+      }
+      updateStudyStreak();
+      meta.bestScore = Math.max(meta.bestScore || 0, session.score);
+      saveBanks();
+    }
+
+    function startTimerIfNeeded() {
+      if (sessionTimer) {
+        clearInterval(sessionTimer);
+        sessionTimer = null;
+      }
+      if (!session || !session.timeLimitMinutes) return;
+      sessionTimer = setInterval(() => {
+        if (!session || session.completed || session.remainingSeconds == null) {
+          clearInterval(sessionTimer);
+          sessionTimer = null;
+          return;
+        }
+        session.remainingSeconds -= 1;
+        if (session.remainingSeconds <= 0) {
+          session.remainingSeconds = 0;
+          finishSession();
+          render();
+          return;
+        }
+        render();
+      }, 1000);
+    }
+
+    function updateStudyStreak() {
+      const today = new Date();
+      const todayStr = today.toISOString().slice(0, 10);
+      if (meta.lastStudyDate === todayStr) return;
+      if (!meta.lastStudyDate) {
+        meta.streak = 1;
+      } else {
+        const prev = new Date(meta.lastStudyDate + 'T00:00:00');
+        const diffDays = Math.round((today - prev) / 86400000);
+        if (diffDays === 1) meta.streak += 1;
+        else if (diffDays > 1) meta.streak = 1;
+      }
+      meta.lastStudyDate = todayStr;
+    }
+
+    function formatTime(seconds) {
+      const mins = Math.floor(seconds / 60);
+      const secs = seconds % 60;
+      return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    }
+
+    function renderImportError(message) {
+      importError.innerHTML = message ? `<div class="error">${escapeHtml(message)}</div>` : '';
+    }
+
+    function render() {
+      renderStats();
+      renderBankList();
+      renderBankPreview();
+      renderPractice();
+    }
+
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => setTab(btn.dataset.tab));
+    });
+
+    document.getElementById('saveBankBtn').addEventListener('click', () => {
+      try {
+        const parsed = parseExamText(importText.value);
+        banks.unshift(parsed);
+        selectedBankId = parsed.id;
+        saveBanks();
+        importText.value = '';
+        renderImportError('');
+        setTab('bank');
+      } catch (error) {
+        renderImportError(error.message || 'Could not import the exam.');
+      }
+    });
+
+    document.getElementById('clearImportBtn').addEventListener('click', () => {
+      importText.value = '';
+      renderImportError('');
+    });
+
+    document.getElementById('exportJsonBtn').addEventListener('click', () => {
+      const payload = {
+        exportedAt: new Date().toISOString(),
+        banks,
+        meta
+      };
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'cute-exam-buddy-backup.json';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      document.getElementById('backupMessage').innerHTML = '<div class="good-box">Backup exported successfully 💾</div>';
+    });
+
+    document.getElementById('importJsonFile').addEventListener('change', async (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      try {
+        const text = await file.text();
+        const parsed = JSON.parse(text);
+        if (!Array.isArray(parsed.banks)) throw new Error('Invalid backup file.');
+        banks = parsed.banks;
+        meta = { ...meta, ...(parsed.meta || {}) };
+        selectedBankId = banks[0]?.id || null;
+        saveBanks();
+        render();
+        document.getElementById('backupMessage').innerHTML = '<div class="good-box">Backup restored successfully 🌷</div>';
+      } catch (error) {
+        document.getElementById('backupMessage').innerHTML = `<div class="error">${escapeHtml(error.message || 'Could not import backup.')}</div>`;
+      }
+      e.target.value = '';
+    });
+
+    document.getElementById('cancelDeleteBtn').addEventListener('click', () => {
+      deleteModal.classList.remove('show');
+      bankToDelete = null;
+    });
+
+    document.getElementById('confirmDeleteBtn').addEventListener('click', () => {
+      if (!bankToDelete) return;
+      banks = banks.filter(bank => bank.id !== bankToDelete.id);
+      if (selectedBankId === bankToDelete.id) selectedBankId = banks[0]?.id || null;
+      if (session?.bankId === bankToDelete.id) session = null;
+      saveBanks();
+      deleteModal.classList.remove('show');
+      bankToDelete = null;
+      render();
+    });
+
+    deleteModal.addEventListener('click', (e) => {
+      if (e.target === deleteModal) {
+        deleteModal.classList.remove('show');
+        bankToDelete = null;
+      }
+    });
+
+    loadBanks();
+    render();
+  </script>
+</body>
+</html>
