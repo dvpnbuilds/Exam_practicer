@@ -625,7 +625,8 @@ ANS: B</pre>
         mode: subset ? 'retry-wrong' : 'full-exam',
         timeLimitMinutes,
         remainingSeconds: timeLimitMinutes ? timeLimitMinutes * 60 : null,
-        startedAt: Date.now()
+        startedAt: Date.now(),
+        showAnswer: false
       };
     }
 
@@ -653,16 +654,29 @@ ANS: B</pre>
       }
 
       bankList.innerHTML = banks.map(bank => `
-        <button class="bank-item ${selectedBankId === bank.id ? 'active' : ''}" data-bank-id="${bank.id}">
-          <div class="bank-top">
-            <div>
-              <div style="font-weight: 700;">${escapeHtml(bank.title)}</div>
-              <div class="muted">${bank.questions.length} questions</div>
-            </div>
-            <div class="badge">#${bank.questions.length}</div>
-          </div>
-        </button>
-      `).join('');
+  <div class="bank-item ${selectedBankId === bank.id ? 'active' : ''}">
+    <div class="bank-top">
+      <div>
+        <div style="font-weight: 700;">${escapeHtml(bank.title)}</div>
+        <div class="muted">${bank.questions.length} questions</div>
+      </div>
+      <div class="badge">#${bank.questions.length}</div>
+    </div>
+
+    <div style="margin-top: 10px;">
+      <button class="btn btn-outline" onclick="renameBank('${bank.id}')">
+        ✏️ Rename
+      </button>
+    </div>
+  </div>
+`).join('');
+
+bankList.querySelectorAll('.bank-item').forEach((el, index) => {
+  el.addEventListener('click', () => {
+    selectedBankId = banks[index].id;
+    render();
+  });
+});
 
       bankList.querySelectorAll('[data-bank-id]').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -671,6 +685,19 @@ ANS: B</pre>
         });
       });
     }
+
+    function renameBank(bankId) {
+  const bank = banks.find(b => b.id === bankId);
+  if (!bank) return;
+
+  const newName = prompt("Rename this exam 💖:", bank.title);
+
+  if (newName && newName.trim()) {
+    bank.title = newName.trim();
+    saveBanks();
+    render();
+  }
+}
 
     function renderBankPreview() {
       const selectedBank = getSelectedBank();
@@ -738,6 +765,9 @@ ANS: B</pre>
       if (!session.completed) {
         const current = session.questions[session.currentIndex];
         const progress = (session.currentIndex / session.questions.length) * 100;
+        const result = session.answers[current.id];
+        const correctChoice = current.shuffledChoices.find(choice => choice.key === current.answer);
+
         practiceContent.innerHTML = `
           <h2 style="margin-top:0; color: var(--purple-dark);">🔀 Practice mode</h2>
           <p class="subtitle">Questions and answer choices are shuffled each time for better review.</p>
@@ -753,19 +783,40 @@ ANS: B</pre>
           <div class="exam-box" style="margin-top: 18px;">
             <div style="font-size: 1.2rem; font-weight: 800; line-height: 1.7;">${escapeHtml(current.prompt)}</div>
             <div style="margin-top: 16px;">
-              ${current.shuffledChoices.map(choice => `
-                <button class="answer-btn" data-choice="${choice.key}">
-                  <span class="answer-key">${choice.key}</span>
-                  <span>${escapeHtml(choice.text || '—')}</span>
-                </button>
-              `).join('')}
+              ${current.shuffledChoices.map(choice => {
+                const isSelected = result?.selected === choice.key;
+                const isCorrect = choice.key === current.answer;
+                let style = "";
+                if (session.showAnswer) {
+                  if (isCorrect) style = "background:#eafaf2; border:2px solid #39b980;";
+                  else if (isSelected) style = "background:#fff0f4; border:2px solid #e0567a;";
+                }
+                return `
+                  <button class="answer-btn" data-choice="${choice.key}" ${session.showAnswer ? 'disabled' : ''} style="${style}">
+                    <span class="answer-key">${choice.key}</span>
+                    <span>${escapeHtml(choice.text || '—')}</span>
+                  </button>
+                `;
+              }).join('')}
             </div>
+            ${session.showAnswer ? `
+              <div style="margin-top:16px; padding:14px; border-radius:16px; background:${result?.isCorrect ? '#eafaf2' : '#fff0f4'}; border:1px solid ${result?.isCorrect ? '#39b980' : '#e0567a'};">
+                <strong>${result?.isCorrect ? 'Correct 🎉' : 'Wrong 😢'}</strong><br>
+                Correct answer: <strong>${current.answer}</strong> — ${escapeHtml(correctChoice?.text || '')}
+              </div>
+              <button class="btn btn-primary" id="nextBtn" style="margin-top:12px;">
+                ${session.currentIndex === session.questions.length - 1 ? 'Finish ✨' : 'Next →'}
+              </button>
+            ` : ''}
           </div>
         `;
 
         practiceContent.querySelectorAll('[data-choice]').forEach(btn => {
           btn.addEventListener('click', () => submitAnswer(btn.dataset.choice));
         });
+        if (session.showAnswer) {
+          document.getElementById('nextBtn')?.addEventListener('click', goNextQuestion);
+        }
         return;
       }
 
@@ -847,18 +898,24 @@ ANS: B</pre>
 
     function submitAnswer(choiceKey) {
       const current = session.questions[session.currentIndex];
+      if (session.showAnswer) return;
       const isCorrect = choiceKey === current.answer;
       session.answers[current.id] = {
         selected: choiceKey,
         correct: current.answer,
         isCorrect
       };
+      session.showAnswer = true;
+      render();
+    }
 
+    function goNextQuestion() {
       const isLast = session.currentIndex === session.questions.length - 1;
       if (isLast) {
         finishSession();
       } else {
         session.currentIndex += 1;
+        session.showAnswer = false;
       }
       render();
     }
