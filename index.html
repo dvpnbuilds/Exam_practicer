@@ -1039,12 +1039,27 @@ bankList.querySelectorAll('.bank-item').forEach((el, index) => {
         const text = await file.text();
         const parsed = JSON.parse(text);
         if (!Array.isArray(parsed.banks)) throw new Error('Invalid backup file.');
-        banks = parsed.banks;
-        meta = { ...meta, ...(parsed.meta || {}) };
-        selectedBankId = banks[0]?.id || null;
-        saveBanks();
-        render();
-        document.getElementById('backupMessage').innerHTML = '<div class="good-box">Backup restored successfully 🌷</div>';
+        // Merge only (no overwrite)
+const incoming = Array.isArray(parsed.banks) ? parsed.banks : [];
+
+// Deduplicate by id (keep existing, add only new)
+const existingIds = new Set(banks.map(b => b.id));
+const toAdd = incoming.filter(b => b && b.id && !existingIds.has(b.id));
+
+banks = [...banks, ...toAdd];
+
+// Merge meta (keep best score / streak updated safely)
+meta = { ...meta, ...(parsed.meta || {}) };
+
+// Keep current selection if possible
+if (!selectedBankId) {
+  selectedBankId = banks[0]?.id || null;
+}
+
+saveBanks();
+render();
+document.getElementById('backupMessage').innerHTML =
+  `<div class="good-box">Merged ${toAdd.length} new bank(s) 🌷</div>`;
       } catch (error) {
         document.getElementById('backupMessage').innerHTML = `<div class="error">${escapeHtml(error.message || 'Could not import backup.')}</div>`;
       }
